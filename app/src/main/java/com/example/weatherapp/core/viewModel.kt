@@ -2,12 +2,16 @@ package com.example.weatherapp.core
 
 
 
+import android.content.ClipData
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weatherapp.core.domain.models.WeatherModel
+import com.example.weatherapp.core.domain.models.forcastModel.City
+import com.example.weatherapp.core.domain.models.forcastModel.ForcastWeather
+import com.example.weatherapp.core.domain.models.forcastModel.Item0
 import com.example.weatherapp.core.domain.usecase.WeatherUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +34,8 @@ class WeatherViewModel(private val weatherUseCase: WeatherUseCase) : ViewModel()
                 _errorMessage.value = null
                 val result = weatherUseCase(city)
                 _weatherState.value = result
+                getForecast(result.latitude, result.longitude)
+                getForecastdays(result.latitude, result.longitude)
             } catch (e: retrofit2.HttpException) {
                 _errorMessage.value = "City not found. Please check the name."
                 _weatherState.value = null
@@ -48,9 +54,56 @@ class WeatherViewModel(private val weatherUseCase: WeatherUseCase) : ViewModel()
             try {
                 val result = weatherUseCase.getWeatherbyLocation(lat, lon)
                 _getWeatherbyLocation.value = result
+                getForecastdays(lat, lon)
+                getForecast(lat, lon)
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error fetching weather by location", e)
             }
         }
+    }
+
+    private val _next24Hours = MutableStateFlow<List<Item0>>(emptyList())
+    val next24Hours: StateFlow<List<Item0>> = _next24Hours
+
+    fun getForecast(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            try {
+                val response = weatherUseCase.getForcastWeather(lat, lon)
+                val filtered = getNext24HourForecast(response.list)
+                _next24Hours.value = filtered
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun getNext24HourForecast(allForecasts: List<Item0>): List<Item0> {
+        val now = System.currentTimeMillis() / 1000
+        val next24h = now + 24 * 60 * 60
+        return allForecasts.filter { it.dt in now..next24h }
+    }
+    private val _city = MutableStateFlow<City?>(null)
+    val city: StateFlow<City?> = _city
+
+    private val _next7Days = MutableStateFlow<List<Item0>>(emptyList())
+    val next7Days: StateFlow<List<Item0>> = _next7Days
+
+    fun getForecastdays(lat: Double, lon: Double) {
+        viewModelScope.launch {
+            try {
+                val response = weatherUseCase.getForcastWeather(lat, lon)
+                _next24Hours.value = getNext24HourForecast(response.list)
+                _next7Days.value = getNext7DaysForecast(response.list)
+                _city.value = response.city
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
+    }
+
+    private fun getNext7DaysForecast(allForecasts: List<Item0>): List<Item0> {
+        return allForecasts
+            .filter { it.dt_txt.contains("12:00:00") } // Pick only mid-day forecast
+            .take(7)
     }
 }

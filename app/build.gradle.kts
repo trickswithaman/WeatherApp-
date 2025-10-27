@@ -107,6 +107,16 @@ dependencies {
     implementation(libs.androidx.compose.runtime.livedata)
     implementation(libs.androidx.compose.runtime)
 
+    //splash
+    implementation(libs.androidx.core.splashscreen)
+
+    implementation(libs.coil.compose)
+
+    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+
+// Lottie for Jetpack Compose
+    implementation("com.airbnb.android:lottie-compose:6.6.10")
+
 
 
 }
