@@ -108,6 +108,18 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
 
     var gpsDialogShown by remember { mutableStateOf(false) }
 
+    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
+    val weatherState by viewModel.weatherState.collectAsStateWithLifecycle()
+    val locationWeather by viewModel.getWeatherbyLocation.observeAsState()
+    var city by remember { mutableStateOf("") }
+    val currentWeather = weatherState ?: locationWeather
+    val forecast by viewModel.next24Hours.collectAsState()
+    val forecast7Days by viewModel.next7Days.collectAsState()
+    remember(currentWeather) {
+        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
+        hour < 1 || hour >= 18
+    }
+
     // 🔹 Automatically request location permission when app launches
     LaunchedEffect(Unit) {
         if (!locationPermissionState.status.isGranted) {
@@ -132,17 +144,6 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                 }
             }
         }
-    }
-    val errorMessage by viewModel.errorMessage.collectAsStateWithLifecycle()
-    val weatherState by viewModel.weatherState.collectAsStateWithLifecycle()
-    val locationWeather by viewModel.getWeatherbyLocation.observeAsState()
-    var city by remember { mutableStateOf("") }
-    val currentWeather = weatherState ?: locationWeather
-    val forecast by viewModel.next24Hours.collectAsState()
-    val forecast7Days by viewModel.next7Days.collectAsState()
-    remember(currentWeather) {
-        val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
-        hour < 1 || hour >= 18
     }
 
 
@@ -303,22 +304,23 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                             val composition by rememberLottieComposition(
                                 LottieCompositionSpec.RawRes(
                                     when {
-                                        weather.icon.endsWith("n") -> R.raw.moon
-                                        weather.description.contains(
-                                            "cloud",
-                                            ignoreCase = true
-                                        ) -> R.raw.cloud
+                                        // 🌙 Clear night only (no rain, no clouds, no snow)
+                                        weather.icon.endsWith("n") &&
+                                                !weather.description.contains("cloud", ignoreCase = true) &&
+                                                !weather.description.contains("rain", ignoreCase = true) &&
+                                                !weather.description.contains("snow", ignoreCase = true) ->
+                                            R.raw.moon
 
-                                        weather.description.contains(
-                                            "rain",
-                                            ignoreCase = true
-                                        ) -> R.raw.rain
+                                        // 🌧️ Rain
+                                        weather.description.contains("rain", ignoreCase = true) -> R.raw.rain
 
-                                        weather.description.contains(
-                                            "snow",
-                                            ignoreCase = true
-                                        ) -> R.raw.snow
+                                        // ❄️ Snow
+                                        weather.description.contains("snow", ignoreCase = true) -> R.raw.snow
 
+                                        // ☁️ Clouds
+                                        weather.description.contains("cloud", ignoreCase = true) -> R.raw.cloud
+
+                                        // ☀️ Clear day (default)
                                         else -> R.raw.sun
                                     }
                                 )
