@@ -4,7 +4,6 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,8 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.layout.wrapContentWidth
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -44,8 +41,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -69,7 +64,6 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.weatherapp.R
 import com.example.weatherapp.core.WeatherViewModel
-import com.example.weatherapp.core.domain.models.forcastModel.Item0
 import com.example.weatherapp.weather.presentaion.getCurrentLocation
 import com.example.weatherapp.weather.presentaion.isLocationEnabled
 import com.example.weatherapp.weather.presentaion.requestEnableGPS
@@ -82,6 +76,7 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.TimeZone
 
 @OptIn(ExperimentalPermissionsApi::class)
 @Composable
@@ -171,23 +166,19 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
             when {
                 icon?.endsWith("n") == true -> R.drawable.night_backgroung
                 description?.contains(
-                    "rain",
-                    ignoreCase = true
+                    "rain", ignoreCase = true
                 ) == true -> R.drawable.rain_background
 
                 description?.contains(
-                    "cloud",
-                    ignoreCase = true
+                    "cloud", ignoreCase = true
                 ) == true -> R.drawable.colud_background
 
                 description?.contains(
-                    "clear sky",
-                    ignoreCase = true
+                    "clear sky", ignoreCase = true
                 ) == true -> R.drawable.sunny_background
 
                 description?.contains(
-                    "night",
-                    ignoreCase = true
+                    "night", ignoreCase = true
                 ) == true -> R.drawable.night_backgroung
 
                 else -> R.drawable.sunny_background
@@ -305,20 +296,34 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                                 LottieCompositionSpec.RawRes(
                                     when {
                                         // 🌙 Clear night only (no rain, no clouds, no snow)
-                                        weather.icon.endsWith("n") &&
-                                                !weather.description.contains("cloud", ignoreCase = true) &&
-                                                !weather.description.contains("rain", ignoreCase = true) &&
-                                                !weather.description.contains("snow", ignoreCase = true) ->
-                                            R.raw.moon
+                                        weather.icon.endsWith("n") && !weather.description.contains(
+                                            "cloud",
+                                            ignoreCase = true
+                                        ) && !weather.description.contains(
+                                            "rain",
+                                            ignoreCase = true
+                                        ) && !weather.description.contains(
+                                            "snow",
+                                            ignoreCase = true
+                                        ) -> R.raw.moon
 
                                         // 🌧️ Rain
-                                        weather.description.contains("rain", ignoreCase = true) -> R.raw.rain
+                                        weather.description.contains(
+                                            "rain",
+                                            ignoreCase = true
+                                        ) -> R.raw.rain
 
                                         // ❄️ Snow
-                                        weather.description.contains("snow", ignoreCase = true) -> R.raw.snow
+                                        weather.description.contains(
+                                            "snow",
+                                            ignoreCase = true
+                                        ) -> R.raw.snow
 
                                         // ☁️ Clouds
-                                        weather.description.contains("cloud", ignoreCase = true) -> R.raw.cloud
+                                        weather.description.contains(
+                                            "cloud",
+                                            ignoreCase = true
+                                        ) -> R.raw.cloud
 
                                         // ☀️ Clear day (default)
                                         else -> R.raw.sun
@@ -418,18 +423,22 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                         verticalArrangement = Arrangement.Center
                     ) {
 
-                        val day = Calendar.getInstance().get(Calendar.DAY_OF_WEEK)
-                        val dayName = when (day) {
-                            Calendar.SUNDAY -> "Sunday"
-                            Calendar.MONDAY -> "Monday"
-                            Calendar.TUESDAY -> "Tuesday"
-                            Calendar.WEDNESDAY -> "Wednesday"
-                            Calendar.THURSDAY -> "Thursday"
-                            Calendar.FRIDAY -> "Friday"
-                            Calendar.SATURDAY -> "Saturday"
-                            else -> {}
-                        }
+                        // --- Convert timezone offset from seconds to milliseconds
+                        val timezoneOffsetMillis = (weather.timezone ?: 0) * 1000L
 
+                        // --- Create a calendar in that timezone
+                        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
+                        utcCalendar.timeInMillis = System.currentTimeMillis() + timezoneOffsetMillis
+
+                        // --- Get day name
+                        val dayName =
+                            SimpleDateFormat("EEEE", Locale.getDefault()).format(utcCalendar.time)
+
+                        // --- Get formatted date
+                        val date = SimpleDateFormat(
+                            "dd MMMM yyyy",
+                            Locale.getDefault()
+                        ).format(utcCalendar.time)
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = "https://openweathermap.org/img/wn/${weather.icon}@2x.png"
@@ -441,9 +450,10 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                             style = MaterialTheme.typography.titleLarge,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold
-                        )
-                        val date =
-                            SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date())
+                        )/*
+                        val date2 =
+                            SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(weather.timezone))
+*/
                         Text(
                             text = "$date",
                             style = MaterialTheme.typography.titleLarge,
@@ -455,8 +465,15 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
 
                     Spacer(modifier = Modifier.height(16.dp))
 
+                    val city2 by viewModel.city.collectAsState()
 
-                    Next24HourForecastSection(forecast)
+                    if (forecast.isNotEmpty() && city2 != null) {
+                        ForecastForCurrentTimeToNext24Hours(
+                            forecast = forecast, city = city2!!
+                        )
+                    }
+
+                    //Next24HourForecastSection(forecast)
 
 
                     Card(
@@ -764,143 +781,10 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
             }
         }
     }
-
-
 }
 
 fun time(timestamp: Long): String {
     val sdf = SimpleDateFormat("HH:mm", Locale.getDefault())
     return sdf.format(Date(timestamp * 1000))
-}
-
-@Composable
-fun Next24HourForecastSection(forecast: List<Item0>) {
-
-    LazyRow(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(12.dp)
-    ) {
-        items(forecast) { item ->
-            val time = remember(item.dt_txt) {
-                val parts = item.dt_txt.split(" ")
-                parts[1].substring(0, 5) // "HH:mm"
-            }
-
-            val isNight = item.weather.first().icon.endsWith("n")
-            val isRain = item.weather.first().main.contains("Rain", ignoreCase = true)
-            val isCloud = item.weather.first().main.contains("Cloud", ignoreCase = true)
-
-            val background = when {
-                isRain -> Brush.verticalGradient(listOf(Color(0xFF4A90E2), Color(0xFF50E3C2)))
-                isCloud -> Brush.verticalGradient(listOf(Color(0xFF90A4AE), Color(0xFFCFD8DC)))
-                isNight -> Brush.verticalGradient(listOf(Color(0xFF0D47A1), Color(0xFF311B92)))
-                else -> Brush.verticalGradient(listOf(Color(0xFFFFC107), Color(0xFFFF9800)))
-            }
-
-            Box(
-                modifier = Modifier
-                    .width(90.dp)
-                    .height(140.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(brush = background)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = time, color = Color.White, style = MaterialTheme.typography.bodySmall
-                    )
-
-
-                    Image(
-                        painter = rememberAsyncImagePainter("https://openweathermap.org/img/wn/${item.weather.first().icon}@2x.png"),
-                        contentDescription = null,
-                        modifier = Modifier.size(50.dp)
-                    )
-
-                    Text(
-                        text = "${item.main.temp}°C",
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun Next7DaysSection(next7Days: List<Item0>) {
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp)
-    ) {
-        Text(
-            text = "Next 7 Days",
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.SemiBold,
-            modifier = Modifier.padding(bottom = 8.dp)
-        )
-
-        next7Days.forEach { forecast ->
-            // 🔹 Convert dt (seconds) to readable day name
-            val date = Date(forecast.dt * 1000L)
-            val sdf =
-                SimpleDateFormat("EEEE", Locale.getDefault()) // gives full day name like "Monday"
-            val dayName = sdf.format(date)
-
-            val weatherMain = forecast.weather.firstOrNull()?.icon ?: ""
-            when {
-                weatherMain.contains("Rain", true) -> R.drawable.rain
-                weatherMain.contains("Cloud", true) -> R.drawable.cloud_black
-                weatherMain.contains("Clear", true) -> R.drawable.white_cloud
-                else -> R.drawable.white_cloud
-            }
-
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 4.dp),
-                shape = RoundedCornerShape(12.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(12.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    // Day name (e.g., Monday)
-                    Text(
-                        text = dayName,
-                        style = MaterialTheme.typography.bodyLarge,
-                        fontWeight = FontWeight.SemiBold
-                    )
-
-
-                    // Weather icon and temperature
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(
-                            painter = rememberAsyncImagePainter("https://openweathermap.org/img/wn/${forecast.weather.first().icon}@2x.png"),
-                            contentDescription = null,
-                            modifier = Modifier.size(32.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-
-                        Text(
-                            text = "${forecast.main.temp_max.toInt()}° / ${forecast.main.temp_min.toInt()}°",
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-                }
-            }
-        }
-    }
 }
 
