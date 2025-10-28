@@ -47,6 +47,29 @@ You'll need to get your own free API key:
 
 ---
 
+## Documentation
+
+The code in this project is documented using **KDoc**, the official documentation style for the Kotlin language. These comments are written directly in the code to explain what each part does.
+
+### Viewing Documentation
+
+You can easily view the documentation for any piece of code directly in Android Studio. Simply hover your mouse cursor over a class, function, or variable name, and a tooltip will appear with its documentation.
+
+### Generating a Documentation Website
+
+For a more comprehensive view, you can generate a full HTML documentation website using a tool called **Dokka**. This website will contain all the KDoc comments in a browsable format.
+
+**To generate the documentation:**
+
+1.  Make sure you have the Dokka plugin added to your `build.gradle.kts` file. If not, you will need to add it.
+2.  Open the Gradle tool window in Android Studio (usually on the right side).
+3.  Navigate to `WeatherApp -> Tasks -> documentation`.
+4.  Run the `dokkaHtml` task.
+
+This will generate a `dokka` folder in your project's `build` directory. Open the `index.html` file inside this folder in a web browser to view the full documentation website.
+
+---
+
 ## How to Use the App
 
 *   **Current Weather:** When you first open the app, it will ask for permission to see your device's location. This is so it can automatically show you the weather right where you are.
