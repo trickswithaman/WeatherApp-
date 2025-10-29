@@ -18,7 +18,7 @@ This is a simple weather application for Android phones. It allows you to:
 
 |                  Current Weather                  |                  5-Day Forecast                   |
 |:-------------------------------------------------:|:-------------------------------------------------:|
-| ![Current Weather](screenShots/forcastImage.jpeg) | ![5-Day Forecast](screenShots/forcastImage2.jpeg) |
+| ![Current Weather](screenshots/forcastImage.jpeg) | ![5-Day Forecast](screenshots/forcastImage2.jpeg) |
 
 ---
 
