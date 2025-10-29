@@ -12,6 +12,16 @@ This is a simple weather application for Android phones. It allows you to:
 
 ---
 
+## Screenshots
+
+*(Here you can add some screenshots of the application. You can take a screenshot of the running app in the Android Studio emulator by clicking the camera icon in the emulator's side panel. Once you have the screenshots, create a `screenshots` folder in the root of the project and add the images there.)*
+
+|               Current Weather                |             5-Day Forecast              |
+|:--------------------------------------------:|:---------------------------------------:|
+| ![Current Weather](screenShots/forcastImage) | ![5-Day Forecast](screenShots/forcastImage2) |
+
+---
+
 ## Getting the App to Work
 
 To get the app from its source code to a working application on a phone, you'll need a few things.
