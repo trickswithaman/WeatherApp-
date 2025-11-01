@@ -20,7 +20,7 @@ fun Navigation(
 
 
 
-    val weatherViewModel = viewModel <WeatherViewModel>()
+//    val weatherViewModel = viewModel <WeatherViewModel>()
     NavHost(
         navController = navController, startDestination = Screen.SplashScreen.route,
     ) {

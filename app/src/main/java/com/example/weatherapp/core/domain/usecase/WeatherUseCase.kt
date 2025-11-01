@@ -16,23 +16,13 @@ class WeatherUseCase(private val repository: WeatherRepository) {
             longitude = response.coord.lon,
             humidity = response.main.humidity,
             windSpeed = response.wind.speed ,
-            pressure = response.main.pressure,
             icon = response.weather.firstOrNull()?.icon ?: "N/A",
-            visibility = response.visibility,
             sunset = response.sys.sunset,
             sunrise = response.sys.sunrise,
-            country = response.sys.country,
-            feels_like = response.main.feels_like,
             temp_max = response.main.temp_max,
             temp_min = response.main.temp_min,
-            timezone = response.timezone,
-            grnd_level = response.main.grnd_level,
             sea_level = response.main.sea_level,
-            id = response.id,
-            main = response.weather.firstOrNull()?.main ?: "N/A",
-            temp_kf = response.main.temp_kf,
-            all = response.clouds.all,
-            temp = response.main.temp
+            dt = response.dt
             )
 
     }
@@ -47,23 +37,13 @@ class WeatherUseCase(private val repository: WeatherRepository) {
             longitude = response.coord.lon,
             humidity = response.main.humidity,
             windSpeed = response.wind.speed ,
-            pressure = response.main.pressure,
             icon = response.weather.firstOrNull()?.icon ?: "N/A",
-            visibility = response.visibility,
             sunset = response.sys.sunset,
             sunrise = response.sys.sunrise,
-            country = response.sys.country,
-            feels_like = response.main.feels_like,
             temp_max = response.main.temp_max,
             temp_min = response.main.temp_min,
-            timezone = response.timezone,
-            grnd_level = response.main.grnd_level,
             sea_level = response.main.sea_level,
-            id = response.id,
-            main = response.weather.firstOrNull()?.main ?: "N/A",
-            temp_kf = response.main.temp_kf,
-            all = response.clouds.all,
-            temp = response.main.temp
+            dt = response.dt
 
         )
     }

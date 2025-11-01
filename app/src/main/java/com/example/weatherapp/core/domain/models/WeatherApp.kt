@@ -20,7 +20,7 @@ data class WeatherApp(
 
 data class WeatherModel(
     val city: String,
-    val timezone: Int,
+    val dt: Int,
     val temperature: Double,
     val description: String,
     val latitude: Double,
@@ -28,21 +28,9 @@ data class WeatherModel(
     val humidity: Int,
     val windSpeed: Double,
     val icon: String,
-    val pressure: Int,
-    val visibility: Int,
-    val country: String,
     val sunrise: Int,
     val sunset: Int,
-    val all: Int,
-    val feels_like: Double,
-    val grnd_level: Int,
     val sea_level: Int,
-    val temp: Double,
-    val temp_kf: Double,
     val temp_max: Double,
-    val temp_min: Double,
-    val id: Int,
-    val main: String
-
-
+    val temp_min: Double
 )

@@ -32,7 +32,6 @@ class WeatherViewModel(private val weatherUseCase: WeatherUseCase) : ViewModel()
                 val result = weatherUseCase(city)
                 _weatherState.value = result
                 getForecast(result.latitude, result.longitude)
-                getForecastdays(result.latitude, result.longitude)
             } catch (e: retrofit2.HttpException) {
                 _errorMessage.value = "City not found. Please check the name."
                 _weatherState.value = null
@@ -51,7 +50,6 @@ class WeatherViewModel(private val weatherUseCase: WeatherUseCase) : ViewModel()
             try {
                 val result = weatherUseCase.getWeatherbyLocation(lat, lon)
                 _getWeatherbyLocation.value = result
-                getForecastdays(lat, lon)
                 getForecast(lat, lon)
             } catch (e: Exception) {
                 Log.e("WeatherViewModel", "Error fetching weather by location", e)
@@ -100,19 +98,6 @@ class WeatherViewModel(private val weatherUseCase: WeatherUseCase) : ViewModel()
         return allForecasts.filter { it.dt_txt.contains("12:00:00") }.take(7)
     }
 
-
-    fun getForecastdays(lat: Double, lon: Double) {
-        viewModelScope.launch {
-            try {
-                val response = weatherUseCase.getForcastWeather(lat, lon)
-                _next24Hours.value = getNext24HourForecast(response.list)
-                _next7Days.value = getNext7DaysForecast(response.list)
-                _city.value = response.city
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     /*private fun getNext7DaysForecast(allForecasts: List<Item0>): List<Item0> {
         return allForecasts

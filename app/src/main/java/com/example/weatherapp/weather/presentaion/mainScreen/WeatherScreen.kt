@@ -142,17 +142,9 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
     }
 
 
-
-
-
-    LaunchedEffect(currentWeather) {
+    LaunchedEffect(currentWeather?.city, currentWeather?.latitude, currentWeather?.longitude) {
         currentWeather?.let { weather ->
             viewModel.getForecast(weather.latitude, weather.longitude)
-        }
-    }
-    LaunchedEffect(currentWeather) {
-        currentWeather?.let { weather ->
-            viewModel.getForecastdays(weather.latitude, weather.longitude)
         }
     }
 
@@ -423,22 +415,14 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                         verticalArrangement = Arrangement.Center
                     ) {
 
-                        // --- Convert timezone offset from seconds to milliseconds
-                        val timezoneOffsetMillis = (weather.timezone ?: 0) * 1000L
-
-                        // --- Create a calendar in that timezone
-                        val utcCalendar = Calendar.getInstance(TimeZone.getTimeZone("UTC"))
-                        utcCalendar.timeInMillis = System.currentTimeMillis() + timezoneOffsetMillis
-
-                        // --- Get day name
-                        val dayName =
-                            SimpleDateFormat("EEEE", Locale.getDefault()).format(utcCalendar.time)
-
-                        // --- Get formatted date
                         val date = SimpleDateFormat(
                             "dd MMMM yyyy",
                             Locale.getDefault()
-                        ).format(utcCalendar.time)
+                        ).format(Date(weather.dt.toLong() * 1000L)) // Use dt from weather data
+
+                        val dayName = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date(weather.dt.toLong() * 1000L))
+
+
                         Image(
                             painter = rememberAsyncImagePainter(
                                 model = "https://openweathermap.org/img/wn/${weather.icon}@2x.png"
@@ -450,10 +434,8 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                             style = MaterialTheme.typography.titleLarge,
                             fontSize = 18.sp,
                             fontWeight = FontWeight.SemiBold
-                        )/*
-                        val date2 =
-                            SimpleDateFormat("dd MMMM yyyy", Locale.getDefault()).format(Date(weather.timezone))
-*/
+                        )
+
                         Text(
                             text = "$date",
                             style = MaterialTheme.typography.titleLarge,
@@ -764,7 +746,7 @@ fun WeatherScreen(navController: NavController, viewModel: WeatherViewModel) {
                     }
 
                     viewModel.city.value
-                    Next7DaysSection(forecast7Days)
+                    Next5DaysSection(next5Days = forecast7Days)
 
                 }
 

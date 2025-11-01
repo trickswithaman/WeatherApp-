@@ -112,7 +112,7 @@ dependencies {
 
     implementation(libs.coil.compose)
 
-    implementation("io.coil-kt.coil3:coil-compose:3.3.0")
+    implementation(libs.coil3.coil.compose)
 
 // Lottie for Jetpack Compose
     implementation("com.airbnb.android:lottie-compose:6.6.10")

@@ -54,16 +54,16 @@ fun ForecastForCurrentTimeToNext24Hours(
                 .parse(item.dt_txt) ?: return@items
 
             val localTime = Date(utcDate.time + timezoneOffsetMillis)
-            val calendar = Calendar.getInstance().apply { time = localTime }
-            val hour = calendar.get(Calendar.HOUR_OF_DAY)
-            val roundedHour = (hour / 3) * 3
-            calendar.set(Calendar.HOUR_OF_DAY, roundedHour)
-            calendar.set(Calendar.MINUTE, 0)
-            calendar.set(Calendar.SECOND, 0)
-            calendar.set(Calendar.MILLISECOND, 0)
+//            val calendar = Calendar.getInstance().apply { time = localTime }
+//            val hour = calendar.get(Calendar.HOUR_OF_DAY)
+//            val roundedHour = (hour / 3) * 3
+//            calendar.set(Calendar.HOUR_OF_DAY, roundedHour)
+//            calendar.set(Calendar.MINUTE, 0)
+//            calendar.set(Calendar.SECOND, 0)
+//            calendar.set(Calendar.MILLISECOND, 0)
 
-            val time = sdf.format(calendar.time)
-//            val time = sdf.format(localTime)
+//            val time = sdf.format(calendar.time)
+            val time = sdf.format(localTime)
 
             val weather = item.weather.firstOrNull()
             val isNight = weather?.icon?.endsWith("n") == true
