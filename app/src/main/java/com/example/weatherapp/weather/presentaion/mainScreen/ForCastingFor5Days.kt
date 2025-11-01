@@ -25,7 +25,6 @@ import com.example.weatherapp.core.domain.models.forcastModel.Item0
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import kotlin.collections.forEach
 
 
 @Composable
@@ -121,7 +120,7 @@ fun Next5DaysSection(next5Days: List<Item0>) {
         val maxTemp = items.maxOf { it.main.temp_max }
         val weatherIcon = items.firstOrNull()?.weather?.firstOrNull()?.icon ?: "01d"
 
-        Triple(dayName, "$minTemp° / $maxTemp°", weatherIcon)
+        Triple(Triple(dayName, dateStr, weatherIcon), "$minTemp° / $maxTemp°", weatherIcon)
     }
 
     // 🔹 Skip today's forecast (index 0)
@@ -139,7 +138,8 @@ fun Next5DaysSection(next5Days: List<Item0>) {
             modifier = Modifier.padding(bottom = 8.dp)
         )
 
-        upcomingDays.forEach { (dayName, tempRange, icon) ->
+        upcomingDays.forEach { (dayInfo, tempRange, icon) ->
+            val (dayName, dateStr, weatherIcon) = dayInfo
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -155,8 +155,13 @@ fun Next5DaysSection(next5Days: List<Item0>) {
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // 🗓️ Day name (e.g., Tuesday)
+                    val inputFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                    val outputFormat = SimpleDateFormat("dd/MM", Locale.getDefault())
+                    val date = inputFormat.parse(dateStr)
+                    val formattedDate = date?.let { outputFormat.format(it) } ?: ""
+                    // Day name (e.g., Monday)
                     Text(
-                        text = dayName,
+                        text = "$formattedDate $dayName",
                         style = MaterialTheme.typography.bodyLarge,
                         fontWeight = FontWeight.SemiBold
                     )
